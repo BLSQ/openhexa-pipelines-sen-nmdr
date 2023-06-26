@@ -1,0 +1,14 @@
+cdsapi
+pandas
+xarray
+openhexa.sdk
+geopandas
+numpy
+netCDF4
+rasterio
+python-dateutil
+fsspec
+requests
+pyarrow
+s3fs
+gcsfs
