@@ -59,43 +59,49 @@ def era5_precipitation():
 
     meta = get_raster_metadata(datafiles)
 
-    ds = merge(
-        src_files=datafiles,
-        dst_file=os.path.join(
-            workspace.files_path, config["output_dir"], f"{config['cds_variable']}.nc"
-        ),
-    )
+    # calculate daily temperature using three different aggregation methods:
+    # day mean, day min and day max
+    for agg in ["mean", "min", "max"]:
+        ds = merge(
+            src_files=datafiles,
+            dst_file=os.path.join(
+                workspace.files_path,
+                config["output_dir"],
+                f"{config['cds_variable']}_{agg}.nc",
+            ),
+            agg=agg,
+        )
 
-    df_daily = spatial_aggregation(
-        ds=ds,
-        dst_file=os.path.join(
-            workspace.files_path,
-            config["output_dir"],
-            f"{config['cds_variable']}_daily.parquet",
-        ),
-        boundaries=boundaries,
-        meta=meta,
-        column_uid=config["column_uid"],
-        column_name=config["column_name"],
-    )
+        df_daily = spatial_aggregation(
+            ds=ds,
+            dst_file=os.path.join(
+                workspace.files_path,
+                config["output_dir"],
+                f"{config['cds_variable']}_{agg}_daily.parquet",
+            ),
+            boundaries=boundaries,
+            meta=meta,
+            column_uid=config["column_uid"],
+            column_name=config["column_name"],
+        )
 
-    weekly(
-        df=df_daily,
-        dst_file=os.path.join(
-            workspace.files_path,
-            config["output_dir"],
-            f"{config['cds_variable']}_weekly.parquet",
-        ),
-    )
+        weekly(
+            df=df_daily,
+            dst_file=os.path.join(
+                workspace.files_path,
+                config["output_dir"],
+                f"{config['cds_variable']}_{agg}_weekly.parquet",
+            ),
+        )
 
-    monthly(
-        df=df_daily,
-        dst_file=os.path.join(
-            workspace.files_path,
-            config["output_dir"],
-            f"{config['cds_variable']}_monthly.parquet",
-        ),
-    )
+        monthly(
+            df=df_daily,
+            dst_file=os.path.join(
+                workspace.files_path,
+                config["output_dir"],
+                f"{config['cds_variable']}_{agg}_monthly.parquet",
+            ),
+        )
 
 
 @era5_precipitation.task
@@ -114,10 +120,10 @@ def download(
     # add a buffer around the bounds and rearrange order for
     # compatbility with climate data store API
     bounds = (
-        round(ymin, 1) - 0.1,
-        round(xmin, 1) - 0.1,
-        round(ymax, 1) + 0.1,
-        round(xmax, 1) + 0.1,
+        round(ymin, 1) - 1,
+        round(xmin, 1) - 1,
+        round(ymax, 1) + 1,
+        round(xmax, 1) + 1,
     )
 
     datafiles = download_monthly_products(

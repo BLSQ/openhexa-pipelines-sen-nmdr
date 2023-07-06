@@ -29,7 +29,13 @@ class DHIS2ImportError(Exception):
     "limit_variable",
     name="Climate variable",
     help="Limit the update to a climate variable",
-    choices=["Temperature", "Precipitation", "Soil Water"],
+    choices=[
+        "Temperature Mean",
+        "Temperature Min",
+        "Temperature Max",
+        "Precipitation",
+        "Soil Water",
+    ],
     type=str,
     required=False,
 )
@@ -100,7 +106,13 @@ def push_climate_data(
     if limit_variable:
         variables = [limit_variable.lower().replace(" ", "_")]
     else:
-        variables = ["temperature", "precipitation", "soil_water"]
+        variables = [
+            "temperature_mean",
+            "temperature_min",
+            "temperature_max",
+            "precipitation",
+            "soil_water",
+        ]
 
     # monthly frequency is disabled for now as data elements are not configured
     # in the target dhis2 instance
