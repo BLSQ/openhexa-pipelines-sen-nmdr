@@ -114,10 +114,10 @@ def download(
     # add a buffer around the bounds and rearrange order for
     # compatbility with climate data store API
     bounds = (
-        round(ymin, 1) - 1,
-        round(xmin, 1) - 1,
-        round(ymax, 1) + 1,
-        round(xmax, 1) + 1,
+        round(ymin, 1) - 0.1,
+        round(xmin, 1) - 0.1,
+        round(ymax, 1) + 0.1,
+        round(xmax, 1) + 0.1,
     )
 
     datafiles = download_monthly_products(
