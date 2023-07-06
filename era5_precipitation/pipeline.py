@@ -59,49 +59,43 @@ def era5_precipitation():
 
     meta = get_raster_metadata(datafiles)
 
-    # calculate daily temperature using three different aggregation methods:
-    # day mean, day min and day max
-    for agg in ["mean", "min", "max"]:
-        ds = merge(
-            src_files=datafiles,
-            dst_file=os.path.join(
-                workspace.files_path,
-                config["output_dir"],
-                f"{config['cds_variable']}_{agg}.nc",
-            ),
-            agg=agg,
-        )
+    ds = merge(
+        src_files=datafiles,
+        dst_file=os.path.join(
+            workspace.files_path, config["output_dir"], f"{config['cds_variable']}.nc"
+        ),
+    )
 
-        df_daily = spatial_aggregation(
-            ds=ds,
-            dst_file=os.path.join(
-                workspace.files_path,
-                config["output_dir"],
-                f"{config['cds_variable']}_{agg}_daily.parquet",
-            ),
-            boundaries=boundaries,
-            meta=meta,
-            column_uid=config["column_uid"],
-            column_name=config["column_name"],
-        )
+    df_daily = spatial_aggregation(
+        ds=ds,
+        dst_file=os.path.join(
+            workspace.files_path,
+            config["output_dir"],
+            f"{config['cds_variable']}_daily.parquet",
+        ),
+        boundaries=boundaries,
+        meta=meta,
+        column_uid=config["column_uid"],
+        column_name=config["column_name"],
+    )
 
-        weekly(
-            df=df_daily,
-            dst_file=os.path.join(
-                workspace.files_path,
-                config["output_dir"],
-                f"{config['cds_variable']}_{agg}_weekly.parquet",
-            ),
-        )
+    weekly(
+        df=df_daily,
+        dst_file=os.path.join(
+            workspace.files_path,
+            config["output_dir"],
+            f"{config['cds_variable']}_weekly.parquet",
+        ),
+    )
 
-        monthly(
-            df=df_daily,
-            dst_file=os.path.join(
-                workspace.files_path,
-                config["output_dir"],
-                f"{config['cds_variable']}_{agg}_monthly.parquet",
-            ),
-        )
+    monthly(
+        df=df_daily,
+        dst_file=os.path.join(
+            workspace.files_path,
+            config["output_dir"],
+            f"{config['cds_variable']}_monthly.parquet",
+        ),
+    )
 
 
 @era5_precipitation.task
@@ -542,7 +536,7 @@ def get_weekly_aggregates(df: pd.DataFrame) -> pd.DataFrame:
     df_["period"] = df_["period"].apply(
         lambda day: str(EpiWeek(datetime.datetime.strptime(day, "%Y-%m-%d")))
     )
-    df_ = df_.groupby(by=["uid", "name", "period"]).mean().reset_index()
+    df_ = df_.groupby(by=["uid", "name", "period"]).sum().reset_index()
     return df_
 
 
@@ -566,7 +560,7 @@ def get_monthly_aggregates(df: pd.DataFrame) -> pd.DataFrame:
     df_["period"] = df_["period"].apply(
         lambda day: datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%Y%m")
     )
-    df_ = df_.groupby(by=["uid", "name", "period"]).mean().reset_index()
+    df_ = df_.groupby(by=["uid", "name", "period"]).sum().reset_index()
     return df_
 
 
