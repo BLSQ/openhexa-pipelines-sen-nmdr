@@ -310,12 +310,15 @@ def to_json(
         values[ou_uid] = []
 
         for _, row in ou_data.iterrows():
+            value = float(round(row["value"], 2))
+            if pd.isna(value):
+                continue
             values[ou_uid].append(
                 {
                     "dataElement": de_uid,
                     "orgUnit": ou_uid,
                     "period": row["period"],
-                    "value": float(round(row["value"], 2)),
+                    "value": value,
                     "categoryOptionCombo": coc_uid,
                     "attributeOptionCombo": coc_uid,
                 }
